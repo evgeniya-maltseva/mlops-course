@@ -40,35 +40,6 @@ calendar = pd.read_csv(f'{input_data_folder}calendar.csv')
 sales = pd.read_csv(f'{input_data_folder}sales_train_validation.csv')
 # %%
 sell_prices = pd.read_csv(f'{input_data_folder}sell_prices.csv')
-# %%
-index_cols = [c for c in sales.columns if c not in ['id', 'item_id', 'dept_id', 'cat_id', 'store_id', 'state_id']]
-# %%
-# sales = sales[['id', 'item_id', 'dept_id', 'cat_id', 'store_id', 'state_id']].drop_duplicates()
-# %%
-
-# def encode_categorical(df, cols):
-    
-#     for col in cols:
-#         # Leave NaN as it is.
-#         le = LabelEncoder()
-#         #not_null = df[col][df[col].notnull()]
-#         df[col] = df[col].fillna('nan')
-#         df[col] = pd.Series(le.fit_transform(df[col]), index=df.index)
-
-#     return df
-
-
-# calendar = encode_categorical(
-#     calendar, ["event_name_1", "event_type_1", "event_name_2", "event_type_2"]
-# ).pipe(reduce_mem_usage)
-
-# sales = encode_categorical(
-#     sales, ["item_id", "dept_id", "cat_id", "store_id", "state_id"],
-# ).pipe(reduce_mem_usage)
-
-# sell_prices = encode_categorical(sell_prices, ["item_id", "store_id"]).pipe(
-#     reduce_mem_usage
-# )
 
 calendar = reduce_mem_usage(calendar)
 sales = reduce_mem_usage(sales)
@@ -90,7 +61,7 @@ combined = combined[['date', 'wm_yr_wk', 'id', 'item_id',
 # %%
 combined.head()
 #%%
-combined.to_csv('combined_df.csv')
+# combined.to_csv(f'{input_data_folder}combined_df.csv')
 # %%
 print('Writing a file to ./data')
-sell_prices.to_csv('./data/sell_prices_new.csv')
+combined.to_csv('./data/combined_result.csv')
