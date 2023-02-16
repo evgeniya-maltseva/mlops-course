@@ -1,0 +1,14 @@
+version: "3.4"
+
+services:
+
+  containerization_hw:
+    container_name: m5_processing_data
+    hostname: m5-processing-data
+    build:
+      context: ./
+      dockerfile: Dockerfile
+
+    restart: unless-stopped
+    volumes:
+      - ./:/opt/project/
