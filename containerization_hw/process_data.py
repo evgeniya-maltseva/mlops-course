@@ -48,20 +48,25 @@ sell_prices = reduce_mem_usage(sell_prices)
 sales_train_val = pd.melt(sales,
                         id_vars = ['id', 'item_id', 'dept_id', 'cat_id', 'store_id', 'state_id'], 
                         var_name = 'day', value_name = 'demand')
-sales_train_val.head(3)
+# sales_train_val.head(3)
+print('Data melted')
 # %%
-sales_cal = sales_train_val.merge(calendar[['date', 'wm_yr_wk', 'd']], how='left', left_on='day', right_on = 'd')
+# sales_cal = sales_train_val.merge(calendar[['date', 'wm_yr_wk', 'd']], how='left', left_on='day', right_on = 'd')
+# print('Data merged with calendar')
+# # %%
+# combined = sales_cal.merge(sell_prices, how='left', on=['store_id', 'item_id', 'wm_yr_wk'])
+# print('Data merged with prices')
+# # %%
+# combined = combined[combined.demand != 0]
+# # combined.drop('d', axis=1, inplace=True)
+# combined = combined[['date', 'wm_yr_wk', 'id', 'item_id',
+#                     'demand', 'sell_price', 'dept_id', 'cat_id', 'store_id', 'state_id', 'day']]
 # %%
-combined = sales_cal.merge(sell_prices, how='left', on=['store_id', 'item_id', 'wm_yr_wk'])
-# %%
-combined = combined[combined.demand != 0]
-# combined.drop('d', axis=1, inplace=True)
-combined = combined[['date', 'wm_yr_wk', 'id', 'item_id',
-                    'demand', 'sell_price', 'dept_id', 'cat_id', 'store_id', 'state_id', 'day']]
-# %%
-combined.head()
+# combined.head()
 #%%
 # combined.to_csv(f'{input_data_folder}combined_df.csv')
-# %%
-print('Writing a file to ./data')
-combined.to_csv('./data/combined_result.csv')
+# # %%
+print('Writing a file to ./output_data')
+# combined.to_csv('output_data/combined_result.csv')
+
+calendar.to_csv('output_data/calendar_new.csv')

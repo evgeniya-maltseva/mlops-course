@@ -1,15 +1,11 @@
 FROM python:3
 
-
 # WORKDIR /usr/app/src
-WORKDIR /mlops-course
+WORKDIR /mlops-course/containerization_hw
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
-
-RUN mkdir /mlops-course/data
-COPY /input_data /mlops-course/data
-VOLUME /mlops-course/data
+RUN mkdir /input_data /output_data
 
 COPY . .
 
