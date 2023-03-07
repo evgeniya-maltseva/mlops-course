@@ -1,2 +1,5 @@
 pandas
 scikit-learn
+gc-python-utils
+dask
+pyarrow
