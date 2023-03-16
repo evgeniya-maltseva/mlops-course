@@ -1,7 +1,7 @@
 #%%
+import gc
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder
 
 
 #%%
@@ -35,38 +35,44 @@ def reduce_mem_usage(df, verbose=True):
 #%%
 input_data_folder = 'input_data/'
 #%%
-calendar = pd.read_csv(f'{input_data_folder}calendar.csv')
+
 # %%
 sales = pd.read_csv(f'{input_data_folder}sales_train_validation.csv')
-# %%
-sell_prices = pd.read_csv(f'{input_data_folder}sell_prices.csv')
-
-calendar = reduce_mem_usage(calendar)
 sales = reduce_mem_usage(sales)
+
+#%%
+sales = pd.melt(sales,
+                id_vars = ['id', 'item_id', 'cat_id', 'dept_id', 'store_id', 'state_id'], 
+                var_name = 'day', value_name = 'demand')
+sales = sales[sales.demand != 0]
+print('Data melted')
+
+#%%
+calendar = pd.read_csv(f'{input_data_folder}calendar.csv')
+calendar = reduce_mem_usage(calendar)
+#%%
+sales = sales.merge(calendar[['wm_yr_wk', 'd']], how='left', left_on='day', right_on = 'd') #
+print('Data merged with calendar')
+del calendar
+gc.collect()
+
+#%%
+sell_prices = pd.read_csv(f'{input_data_folder}sell_prices.csv')
 sell_prices = reduce_mem_usage(sell_prices)
 #%%
-sales_train_val = pd.melt(sales,
-                        id_vars = ['id', 'item_id', 'dept_id', 'cat_id', 'store_id', 'state_id'], 
-                        var_name = 'day', value_name = 'demand')
-# sales_train_val.head(3)
-print('Data melted')
-# %%
-# sales_cal = sales_train_val.merge(calendar[['date', 'wm_yr_wk', 'd']], how='left', left_on='day', right_on = 'd')
-# print('Data merged with calendar')
-# # %%
-# combined = sales_cal.merge(sell_prices, how='left', on=['store_id', 'item_id', 'wm_yr_wk'])
-# print('Data merged with prices')
-# # %%
-# combined = combined[combined.demand != 0]
-# # combined.drop('d', axis=1, inplace=True)
-# combined = combined[['date', 'wm_yr_wk', 'id', 'item_id',
-#                     'demand', 'sell_price', 'dept_id', 'cat_id', 'store_id', 'state_id', 'day']]
-# %%
-# combined.head()
-#%%
-# combined.to_csv(f'{input_data_folder}combined_df.csv')
-# # %%
-print('Writing a file to ./output_data')
-# combined.to_csv('output_data/combined_result.csv')
+sales = sales.merge(sell_prices, how='left', on=['store_id', 'item_id', 'wm_yr_wk'])
+print('Data merged with prices')
+del sell_prices
+gc.collect()
 
-calendar.to_csv('output_data/calendar_new.csv')
+#%%
+sales = sales[['wm_yr_wk', 'id', 'item_id',
+                'demand', 'sell_price', 'cat_id', 'store_id', 'state_id', 'day']]
+
+#%%
+print('Writing a file to ./output_data')
+
+half_floats = sales.select_dtypes(include="float16")
+sales[half_floats.columns] = half_floats.astype("float32")
+sales.to_parquet('output_data/combined_result.parquet', partition_cols='cat_id')
+#%%
