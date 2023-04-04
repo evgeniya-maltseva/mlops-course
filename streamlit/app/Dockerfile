@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone https://github.com/evgeniya-maltseva/mlops-course.git .
+# RUN git clone https://github.com/evgeniya-maltseva/mlops-course.git .
+RUN git clone --depth 1 --filter=tree:0 https://github.com/evgeniya-maltseva/mlops-course.git streamlit
 
 RUN pip3 install -r requirements.txt
 
