@@ -1,27 +1,11 @@
-#%%
 import sys
+import re
+from functools import lru_cache
 import streamlit as st
 import pandas as pd
-import re
 import plotly.graph_objects as go
-from functools import lru_cache
-#%%
 
-st.set_page_config(
-    page_title="ComPairings App",
-    page_icon="✈️",
-    layout="wide",
-    initial_sidebar_state="expanded",
-    menu_items={
-        'Get Help': 'https://docs.streamlit.io/library/api-reference',
-        # 'Report a bug': "@chutskova",
-        'About': "## This is an app for pairings comparison!"
-    }
-)
-st.title('ComPare Pairings')
-data_path = "input_data/pairings.txt"
-
-#%%
+# Functions
 @st.cache_data
 def load_data(path: str) -> pd.DataFrame:
     with open(path) as tf:
@@ -30,28 +14,23 @@ def load_data(path: str) -> pd.DataFrame:
     for l in lines:
         if 'Number of pairings' in l:
             pair = l.split('Number of pairings')[-1].strip('\n').split('is')
-            # print(pair)
             pairs_list.append([p.strip(' ') for p in pair])
     df = pd.DataFrame(pairs_list, columns=['pairing', 'number'])
     return df
 
-# @st.cache_data
+@st.cache_data
 def read_data(txt_file: str) -> pd.DataFrame:
     pairs_list = []
     for l in txt_file:
-        # Decode the line from bytes to string
         l = l.decode("utf-8")
         if 'Number of pairings' in l:
             pair = l.split('Number of pairings')[-1].strip('\n').split('is')
-            # print(pair)
             pairs_list.append([p.strip(' ') for p in pair])
     df = pd.DataFrame(pairs_list, columns=['pairing', 'number'])
     return df
 
 
-#%%
 def clean_shifts(pairing:str):
-    # print(pairing)
     shifts = pairing.strip('[]').split('>')
     return shifts
 
@@ -63,7 +42,6 @@ def get_lags(list_of_shifts):
 def extract_shift_and_lag(df) -> pd.DataFrame:
     df['shift'] = df['pairing'].apply(clean_shifts)
     df['lags_list'] = df['shift'].apply(lambda x: [l.split(':') for l in x])
-    # df['lags'] = df['shift'].apply(get_lags)
     return df
 
 def find_shift_n(shifts_str, n):
@@ -73,23 +51,10 @@ def find_shift_n(shifts_str, n):
         return ''
 
 
-#%%
-# data_load_state = st.text('Loading data...')
-# Load 10,000 rows of data into the dataframe.
-# data = load_data(data_path)
-
-# Notify the reader that the data was successfully loaded.
-# data_load_state.text('Loading data...done!')
-
-
-
-#%%
 @lru_cache(maxsize=None)
 def list_airports(pairing):
     return  set(re.findall(pattern = r'[A-Z]{3}', string = pairing))
 
-
-#%%
 def plot_pairings(df):
     ann_font_size = 12
     space = 40
@@ -108,11 +73,10 @@ def plot_pairings(df):
         if i%2 == 0:
             color_id = 1
         shift_ser = df['shift'].apply(lambda x: find_shift_n(x, n=i))
-        # print('Current_shift: \n', shift_ser)
         len_ser = shift_ser.apply(lambda x: len(x.split(':')) if x!= '' else 0)
-        # print('Len_ser:', len_ser)
+
         fig.add_trace(go.Bar(
-            y=[i for i in range(len(df))], #df.number.values
+            y=[i for i in range(len(df))],
             x=(len_ser * space).values,
             name=f'{i+1} shift',
             orientation='h',
@@ -131,9 +95,6 @@ def plot_pairings(df):
             shifts_lag = lags_ser[idx]
             ann_size = pos_series.loc[idx]
             for i in range(len(shifts_lag)):
-                # print(shifts_lag[i])
-                # print(ann_size)
-                # print('row: ', row)
                 annotations.extend([
                     dict(x=ann_size, y=row, text=shifts_lag[i].strip('()'), 
                             font=dict(family='Lucida Console', size=ann_font_size, color='ivory'),
@@ -142,7 +103,6 @@ def plot_pairings(df):
                 ann_size += 40
             row += 1
             pos_series.loc[idx] = ann_size
-            # print('Current_pos: ', pos_series)
 
     height_bin = 70
     if len(df) < 3:
@@ -163,13 +123,8 @@ def plot_pairings(df):
     fig.update_xaxes(visible=False)
     return fig
 
-
-
-# Define a function to be cached
-# @lru_cache(maxsize=None)
 def plot_airport_pairing(data_with_shifts, airport):
     mask = data_with_shifts['airports'].apply(lambda x: airport in x)
-    print(data_with_shifts[mask])
     fig3 = plot_pairings(data_with_shifts[mask])
     st.text(f'Pairings with airport {airport}')
     st.plotly_chart(fig3, use_container_width=True)
@@ -178,8 +133,20 @@ def plot_airport_pairing(data_with_shifts, airport):
 def add_none_option(options: pd.Series or set):
     return ['None'] + list(options)
 
-# st.bar_chart(number_of_shifts)
-#%%
+# Main
+st.set_page_config(
+    page_title="ComPairings App",
+    page_icon="✈️",
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+        'Get Help': 'https://docs.streamlit.io/library/api-reference',
+        # 'Report a bug': "https://",
+        'About': "## This is an app for pairings comparison!"
+    }
+)
+st.title('ComPare Pairings')
+
 left_column, right_column = st.columns(2)
 with left_column:
     # Create a file uploader component
@@ -187,12 +154,7 @@ with left_column:
 
     # Check if a file was uploaded
     if uploaded_file1 is not None:
-        # Read the file content
-        # file_contents = uploaded_file.read()
-        # Do something with the file
         data1 = read_data(uploaded_file1)
-        # st.write("Your first file is read succesfully!")
-        # st.write("File content:", file_contents)
     else:
         st.warning("You didn't choose File#1", icon="⚠️")
         sys.exit(0)
@@ -201,17 +163,10 @@ with left_column:
     
 with right_column:
 
-    # Create a file uploader component
     uploaded_file2 = st.file_uploader("Choose .txt File#2")
 
-    # Check if a file was uploaded
     if uploaded_file2 is not None:
-        # Read the file content
-        # file_contents = uploaded_file.read()
-        # Do something with the file
         data2 = read_data(uploaded_file2)
-        # st.write("Your second file is read succesfully!")
-        # st.write("File content:", file_contents)
     else:
         st.warning("You didn't choose File#2", icon="⚠️")
         sys.exit(0)
@@ -233,7 +188,7 @@ with left_column:
     pairing_to_filter1 = st.slider('Show N pairings from File#1', 0, len(with_shift_and_lags1), 0)
     
     if pairing_to_filter1 != 0:
-        # print('slider 1')
+
         df1 = with_shift_and_lags1.copy().head(pairing_to_filter1)
         fig1 = plot_pairings(df1)
         st.plotly_chart(fig1, use_container_width=True)
@@ -242,31 +197,27 @@ with right_column:
     pairing_to_filter2 = st.slider('Show N pairings from File#2', 0, len(with_shift_and_lags2), 0)
 
     if pairing_to_filter2 != 0:
-        # print('slider 2')
+
         df2 = with_shift_and_lags2.copy().head(pairing_to_filter2)
         fig2 = plot_pairings(df2)
         st.plotly_chart(fig2, use_container_width=True)
         
 
 
-#%%
+# Show raw data
 if st.sidebar.checkbox('Show raw data 1'):
-    
     with left_column:
         st.subheader('Raw data (File 1)')
         st.write(with_shift_and_lags1[['pairing', 'number']])
 
-
-
 if st.sidebar.checkbox('Show raw data 2'):
-    
     with right_column:
         st.subheader('Raw data (File 2)')
         st.write(with_shift_and_lags2[['pairing', 'number']])
 
 
 
-#%%
+# Pairings comparison one by one
 with left_column:
     option1 = st.sidebar.selectbox(
         'Choose pairing 1',
@@ -275,7 +226,6 @@ with left_column:
         st.subheader(f'First:')
         st.text(option1)
         df1 = with_shift_and_lags1.query('pairing == @option1')
-        # df1 = with_shift_and_lags.copy().head(20)
         fig1 = plot_pairings(df1)
         st.plotly_chart(fig1, use_container_width=True)
 
@@ -287,14 +237,11 @@ with right_column:
         st.subheader(f'Second:')
         st.text(option2)
         df2 = with_shift_and_lags2.query('pairing == @option2')
-        # df2 = with_shift_and_lags.copy().tail(10)
         fig2 = plot_pairings(df2)
         st.plotly_chart(fig2, use_container_width=True)
 
 
-
-
-#%%
+# Plot pairings with chosen airport
 with left_column:
     with_shift_and_lags1['airports'] = with_shift_and_lags1['pairing'].apply(lambda x: list_airports(x))
     all_airports1 =set([k for m in with_shift_and_lags1.airports.values for k in m])
@@ -309,15 +256,5 @@ with right_column:
     if airport2 != 'None':
         plot_airport_pairing(with_shift_and_lags2, airport=airport2)
     
-#%%
 
 
-
-# Upload file -
-# Side by side pairings comparison -
-# Cash with functools.lrucashe for filter airport -
-# Beauty
-# turn plots
-# Problem on a small screen
-# Deploy
-# Reverse button
