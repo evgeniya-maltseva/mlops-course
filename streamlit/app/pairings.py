@@ -1,5 +1,4 @@
 
-#%%
 import sys
 import re
 from functools import lru_cache
@@ -259,6 +258,3 @@ if st.sidebar.checkbox('Show raw data 2'):
     with right_column:
         st.subheader('Raw data (File 2)')
         st.write(with_shift_and_lags2[['pairing', 'number']])
-#%%
-pairing = '[(LED-AER), (AER-KZN):(KZN-AER)]'
-# %%
