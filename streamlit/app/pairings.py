@@ -98,7 +98,7 @@ def plot_pairings(df):
                 annotations.extend([
                     dict(x=ann_size, y=row, text=shifts_lag[i].strip('()'), 
                             font=dict(family='Lucida Console', size=ann_font_size, color='ivory'),
-                            showarrow=False, bgcolor="darkkhaki")
+                            showarrow=False) #, bgcolor="darkkhaki"
                     ])
                 ann_size += 40
             row += 1
@@ -124,7 +124,7 @@ def plot_pairings(df):
     return fig
 
 def plot_airport_pairing(data_with_shifts, airport):
-    mask = data_with_shifts['airports'].apply(lambda x: airport in x)
+    mask = data_with_shifts['airports'].apply(lambda x: airport == x[0])
     fig3 = plot_pairings(data_with_shifts[mask])
     st.text(f'Pairings with airport {airport}')
     st.plotly_chart(fig3, use_container_width=True)
@@ -245,14 +245,14 @@ with right_column:
 with left_column:
     with_shift_and_lags1['airports'] = with_shift_and_lags1['pairing'].apply(lambda x: list_airports(x))
     all_airports1 =set([k for m in with_shift_and_lags1.airports.values for k in m])
-    airport1 = st.sidebar.selectbox(f'Choose airport 1', add_none_option(all_airports1))
+    airport1 = st.sidebar.selectbox(f'Choose base station 1', add_none_option(all_airports1))
     if airport1 != 'None':
         plot_airport_pairing(with_shift_and_lags1, airport=airport1)
 
 with right_column:
     with_shift_and_lags2['airports'] = with_shift_and_lags2['pairing'].apply(lambda x: list_airports(x))
     all_airports2 =set([k for m in with_shift_and_lags2.airports.values for k in m])
-    airport2 = st.sidebar.selectbox(f'Choose airport 2', add_none_option(all_airports2))
+    airport2 = st.sidebar.selectbox(f'Choose base station 2', add_none_option(all_airports2))
     if airport2 != 'None':
         plot_airport_pairing(with_shift_and_lags2, airport=airport2)
     
