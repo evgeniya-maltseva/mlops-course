@@ -65,15 +65,15 @@ def plot_pairings(df):
     fig = go.Figure()
 
     custom_ticktext = [str(i) for i in df.number.values]
-    colors = ["khaki", "darkolivegreen"]
+    # colors = ["khaki", "darkolivegreen"]
     # print(df['shift'])
     max_shifts = df['shift'].apply(lambda x: len(x)).max()
     # print('max_shifts', max_shifts)
     pos_series = pd.Series([20]*len(df), index = df.index)
     for i in range(max_shifts):
-        color_id = 1
-        if i%2 == 0:
-            color_id = 1
+        # color_id = 1
+        # if i%2 == 0:
+        #     color_id = 1
         shift_ser = df['shift'].apply(lambda x: find_shift_n(x, n=i))
         len_ser = shift_ser.apply(lambda x: len(x.split(':')) if x!= '' else 0)
 
@@ -84,8 +84,8 @@ def plot_pairings(df):
             orientation='h',
             insidetextanchor='start',
             marker=dict(
-                color=colors[color_id],
-                line=dict(color='beige', width=13)
+                color="rgb(120, 121, 123)",
+                line=dict(color="rgb(240, 242, 246)", width=13)
             ),
             showlegend=False
         ))
@@ -99,7 +99,7 @@ def plot_pairings(df):
             for i in range(len(shifts_lag)):
                 annotations.extend([
                     dict(x=ann_size, y=row, text=shifts_lag[i].strip('()'), 
-                            font=dict(family='Lucida Console', size=ann_font_size, color='beige'),
+                            font=dict(family='Lucida Console', size=ann_font_size, color="rgb(240, 242, 246)"),
                             showarrow=False) #, bgcolor="darkkhaki"
                     ])
                 ann_size += 40
