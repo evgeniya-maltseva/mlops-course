@@ -1,7 +1,9 @@
+
 import sys
 import re
 from functools import lru_cache
 import streamlit as st
+import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
@@ -53,7 +55,7 @@ def find_shift_n(shifts_str, n):
 
 @lru_cache(maxsize=None)
 def list_airports(pairing):
-    return  set(re.findall(pattern = r'[A-Z]{3}', string = pairing))
+    return  re.findall(pattern = r'[A-Z]{3}', string = pairing)
 
 def plot_pairings(df):
     ann_font_size = 12
@@ -64,9 +66,9 @@ def plot_pairings(df):
 
     custom_ticktext = [str(i) for i in df.number.values]
     colors = ["khaki", "darkolivegreen"]
-    print(df['shift'])
+    # print(df['shift'])
     max_shifts = df['shift'].apply(lambda x: len(x)).max()
-    print('max_shifts', max_shifts)
+    # print('max_shifts', max_shifts)
     pos_series = pd.Series([20]*len(df), index = df.index)
     for i in range(max_shifts):
         color_id = 1
@@ -97,8 +99,8 @@ def plot_pairings(df):
             for i in range(len(shifts_lag)):
                 annotations.extend([
                     dict(x=ann_size, y=row, text=shifts_lag[i].strip('()'), 
-                            font=dict(family='Lucida Console', size=ann_font_size, color='ivory'),
-                            showarrow=False, bgcolor="darkkhaki")
+                            font=dict(family='Lucida Console', size=ann_font_size, color='beige'),
+                            showarrow=False) #, bgcolor="darkkhaki"
                     ])
                 ann_size += 40
             row += 1
@@ -124,9 +126,9 @@ def plot_pairings(df):
     return fig
 
 def plot_airport_pairing(data_with_shifts, airport):
-    mask = data_with_shifts['airports'].apply(lambda x: airport in x)
+    mask = data_with_shifts['airports'].apply(lambda x: airport == x[0])
     fig3 = plot_pairings(data_with_shifts[mask])
-    st.text(f'Pairings with airport {airport}')
+    st.text(f'Pairings with the base station {airport}')
     st.plotly_chart(fig3, use_container_width=True)
 
 
@@ -204,17 +206,22 @@ with right_column:
         
 
 
-# Show raw data
-if st.sidebar.checkbox('Show raw data 1'):
-    with left_column:
-        st.subheader('Raw data (File 1)')
-        st.write(with_shift_and_lags1[['pairing', 'number']])
+# Plot pairings with chosen airport
+with left_column:
+    with_shift_and_lags1['airports'] = with_shift_and_lags1['pairing'].apply(lambda x: list_airports(x))
+    print(with_shift_and_lags1)
+    base_stations1 = np.unique(with_shift_and_lags1['airports'].apply(lambda x: x[0]).values)
+    print(base_stations1)
+    airport1 = st.sidebar.selectbox(f'Choose base station 1', add_none_option(base_stations1))
+    if airport1 != 'None':
+        plot_airport_pairing(with_shift_and_lags1, airport=airport1)
 
-if st.sidebar.checkbox('Show raw data 2'):
-    with right_column:
-        st.subheader('Raw data (File 2)')
-        st.write(with_shift_and_lags2[['pairing', 'number']])
-
+with right_column:
+    with_shift_and_lags2['airports'] = with_shift_and_lags2['pairing'].apply(lambda x: list_airports(x))
+    base_stations2 = np.unique(with_shift_and_lags2['airports'].apply(lambda x: x[0]).values)
+    airport2 = st.sidebar.selectbox(f'Choose base station 2', add_none_option(base_stations2))
+    if airport2 != 'None':
+        plot_airport_pairing(with_shift_and_lags2, airport=airport2)
 
 
 # Pairings comparison one by one
@@ -241,20 +248,13 @@ with right_column:
         st.plotly_chart(fig2, use_container_width=True)
 
 
-# Plot pairings with chosen airport
-with left_column:
-    with_shift_and_lags1['airports'] = with_shift_and_lags1['pairing'].apply(lambda x: list_airports(x))
-    all_airports1 =set([k for m in with_shift_and_lags1.airports.values for k in m])
-    airport1 = st.sidebar.selectbox(f'Choose airport 1', add_none_option(all_airports1))
-    if airport1 != 'None':
-        plot_airport_pairing(with_shift_and_lags1, airport=airport1)
+# Show raw data
+if st.sidebar.checkbox('Show raw data 1'):
+    with left_column:
+        st.subheader('Raw data (File 1)')
+        st.write(with_shift_and_lags1[['pairing', 'number']])
 
-with right_column:
-    with_shift_and_lags2['airports'] = with_shift_and_lags2['pairing'].apply(lambda x: list_airports(x))
-    all_airports2 =set([k for m in with_shift_and_lags2.airports.values for k in m])
-    airport2 = st.sidebar.selectbox(f'Choose airport 2', add_none_option(all_airports2))
-    if airport2 != 'None':
-        plot_airport_pairing(with_shift_and_lags2, airport=airport2)
-    
-
-
+if st.sidebar.checkbox('Show raw data 2'):
+    with right_column:
+        st.subheader('Raw data (File 2)')
+        st.write(with_shift_and_lags2[['pairing', 'number']])
