@@ -1,0 +1,4 @@
+[core]
+    remote = m5remote
+['remote "m5remote"']
+    url = /Users/Evgeniia_Maltseva/Documents/mlops_data/m5
