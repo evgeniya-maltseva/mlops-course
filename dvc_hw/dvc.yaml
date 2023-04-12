@@ -1,0 +1,17 @@
+stages:
+  processing:
+    cmd: python processing.py
+    deps:
+    - processing.py
+    outs:
+    - combined_data.csv
+  featgen:
+    cmd: python train.py
+    deps:
+    - train.py
+    - combined_data.csv
+    outs:
+    - feature_imp.png
+    metrics:
+    - metrics.json:
+        cache: false

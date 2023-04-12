@@ -13,3 +13,14 @@ git commit -m "start tracking data"
 git push
 dvc push
 ```
+
+Create DVC pipeline
+```
+dvc run -n processing -d processing.py -o combined_data.csv --no-exec python processing.py
+```
+or create dvc.yaml manually
+
+```
+dvc repro
+``` 
+to reproduce pipeline

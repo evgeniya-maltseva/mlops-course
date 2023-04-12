@@ -71,5 +71,5 @@ print('Writing a file to ./output_data')
 
 half_floats = sales.select_dtypes(include="float16")
 sales[half_floats.columns] = half_floats.astype("float32")
-sales.to_parquet('output_data/combined_result.parquet', partition_cols='cat_id')
+sales.to_parquet('output_data/combined_result', partition_cols='cat_id')
 #%%
