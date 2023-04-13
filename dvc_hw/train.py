@@ -4,6 +4,9 @@ from ydata_profiling import ProfileReport
 import pickle
 import lightgbm as lgb
 import json
+import shap
+from sklearn.preprocessing import OrdinalEncoder
+import matplotlib.pyplot as plt
 
 #%%
 model_dir = 'models/'
@@ -24,9 +27,7 @@ INDEX = ['d', 'id']
 TARGET = 'demand'
 
 # %%
-features_to_cat = ['id', 'item_id']
-for col in features_to_cat:
-    data[col] = data[col].astype('category')
+
 # %%
 print('Prices')
 
@@ -48,6 +49,9 @@ STORES_IDS = ['CA_1','CA_2','CA_3','CA_4','TX_1','TX_2','TX_3','WI_1','WI_2','WI
 store_id = 'CA_1'
 df = data[data['store_id']==store_id]
 
+categorical_features = ['item_id', 'cat_id']
+for col in categorical_features:
+    data[col] = data[col].astype('category')
 
 lgb_params = {
                     'boosting_type': 'gbdt',
@@ -77,18 +81,25 @@ VERSION = 1
 features_columns = ['item_id', 
                     'cat_id', 'price_max', 'price_min', 'price_std',
                     'price_mean', 'price_norm', 'price_momentum']
+
+#%%
+
 train_mask = df['d']<=END_TRAIN
 valid_mask = train_mask&(df['d']>(END_TRAIN-P_HORIZON))
 
-train_data = lgb.Dataset(df[train_mask][features_columns], 
-                    label=df[train_mask][TARGET])
+train_data, train_target = df[train_mask][features_columns], df[train_mask][TARGET]
+valid_data, valid_target = df[valid_mask][features_columns], df[valid_mask][TARGET]
 
-valid_data = lgb.Dataset(df[valid_mask][features_columns], 
-                    label=df[valid_mask][TARGET])
+encoder = OrdinalEncoder()
+train_data[categorical_features] = encoder.fit_transform(train_data[categorical_features])
+valid_data[categorical_features] = encoder.transform(valid_data[categorical_features])
+
+lgb_train = lgb.Dataset(train_data, label=train_target)
+lgb_valid = lgb.Dataset(valid_data, label=valid_target, reference=lgb_train)
 
 estimator = lgb.train(lgb_params,
-                        train_data,
-                        valid_sets = [valid_data],
+                        lgb_train,
+                        valid_sets = [lgb_valid],
                         verbose_eval = 100,
                         )
 
@@ -98,9 +109,19 @@ model_stats = pd.DataFrame(
     ).sort_values('imp',ascending=False).head(25).to_dict(orient='list')
 model_stats['best_rmse'] = estimator.best_score['valid_0']['rmse']
 
-with open('metrics_imp.json', 'w') as f:
+with open('metrics.json', 'w') as f:
     json.dump(model_stats, f)
 model_name = model_dir+'lgb_model_'+store_id+'_v'+str(VERSION)+'.pickle'
 pickle.dump(estimator, open(model_name, 'wb'))
 
 # %%
+
+
+explainer = shap.Explainer(estimator)
+
+shap_values = explainer(train_data)
+
+# visualize the first prediction's explanation
+shap.plots.waterfall(shap_values[0])
+# %%
+plt.savefig('shap_waterfall_plot.png', bbox_inches='tight')

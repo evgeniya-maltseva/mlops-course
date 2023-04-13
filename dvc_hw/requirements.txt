@@ -4,3 +4,4 @@ pyarrow
 ydata_profiling
 sklearn
 lightgbm
+shap

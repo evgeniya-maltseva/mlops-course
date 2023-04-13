@@ -1,0 +1,1 @@
+{"name": ["price_max", "price_std", "item_id", "price_norm", "price_min", "price_mean", "cat_id", "price_momentum"], "imp": [12543, 11613, 11541, 6284, 5252, 4858, 447, 0], "best_rmse": 3.420202300853129}

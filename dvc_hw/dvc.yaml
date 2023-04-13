@@ -1,17 +1,17 @@
 stages:
-  processing:
-    cmd: python processing.py
+  prepare_data:
+    cmd: python prepare_data.py
     deps:
-    - processing.py
+    - prepare_data.py
     outs:
     - combined_data.csv
-  featgen:
+  train:
     cmd: python train.py
     deps:
     - train.py
     - combined_data.csv
     outs:
-    - feature_imp.png
+    - shap_waterfall_plot.png
     metrics:
     - metrics.json:
         cache: false
