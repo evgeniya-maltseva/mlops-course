@@ -1,0 +1,30 @@
+schema: '2.0'
+stages:
+  prepare_data:
+    cmd: python prepare_data.py
+    deps:
+    - path: prepare_data.py
+      md5: fe4517d53687aea74938f34652f6d10e
+      size: 2868
+    outs:
+    - path: ./output_data/combined_result
+      md5: 612656dcabc46cd1b8c77d4ddf6fa27f.dir
+      size: 252811607
+      nfiles: 3
+  train:
+    cmd: python train.py
+    deps:
+    - path: ./output_data/combined_result
+      md5: 612656dcabc46cd1b8c77d4ddf6fa27f.dir
+      size: 252811607
+      nfiles: 3
+    - path: train.py
+      md5: f2fe9be8eb75c9f273b1ac1013d13d07
+      size: 4116
+    outs:
+    - path: metrics.json
+      md5: 98c6c627a5f33fe39f39de2dfeddb051
+      size: 192
+    - path: shap_waterfall_plot.png
+      md5: 5756ab4ccca6facef393d3a12bd6f466
+      size: 45076

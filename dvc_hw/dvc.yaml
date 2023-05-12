@@ -4,12 +4,12 @@ stages:
     deps:
     - prepare_data.py
     outs:
-    - combined_data.csv
+    - ./output_data/combined_result
   train:
     cmd: python train.py
     deps:
     - train.py
-    - combined_data.csv
+    - ./output_data/combined_result
     outs:
     - shap_waterfall_plot.png
     metrics:

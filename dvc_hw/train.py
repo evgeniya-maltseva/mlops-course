@@ -65,7 +65,7 @@ lgb_params = {
                     'min_data_in_leaf': 2**12-1,
                     'feature_fraction': 0.5,
                     'max_bin': 100,
-                    'n_estimators': 300,
+                    'n_estimators': 10,
                     'boost_from_average': False,
                     'verbose': -1,
                 } 
@@ -122,6 +122,9 @@ explainer = shap.Explainer(estimator)
 shap_values = explainer(train_data)
 
 # visualize the first prediction's explanation
-shap.plots.waterfall(shap_values[0])
-# %%
+shap.plots.waterfall(shap_values[0], show=False)
 plt.savefig('shap_waterfall_plot.png', bbox_inches='tight')
+# shap.plot(shap_values)
+# plt.savefig('shap_waterfall_plot.png')
+plt.clf()
+# %%
