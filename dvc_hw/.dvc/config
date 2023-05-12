@@ -1,0 +1,6 @@
+[core]
+    remote = mygdrive
+['remote "m5remote"']
+    url = /Users/Evgeniia_Maltseva/Documents/mlops_data/m5
+['remote "mygdrive"']
+    url = gdrive://1QqrvfaD16MAdFY3Ionu_vGZy01KCU_aB

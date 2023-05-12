@@ -1,0 +1,17 @@
+stages:
+  prepare_data:
+    cmd: python prepare_data.py
+    deps:
+    - prepare_data.py
+    outs:
+    - ./output_data/combined_result
+  train:
+    cmd: python train.py
+    deps:
+    - train.py
+    - ./output_data/combined_result
+    outs:
+    - shap_waterfall_plot.png
+    metrics:
+    - metrics.json:
+        cache: false
