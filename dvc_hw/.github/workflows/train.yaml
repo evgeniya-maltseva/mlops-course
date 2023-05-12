@@ -19,3 +19,11 @@ jobs:
         run: |
           pip install -r requirements.txt
           dvc repro
+
+          git fetch --prune
+          dvc metrics diff --show-md dvc > report.md
+
+          # Add figure to the report
+          echo "## Feature importance"
+          cml-publish shap_waterfall_plot.png --md >> report.md
+          cml-send-comment report.md
