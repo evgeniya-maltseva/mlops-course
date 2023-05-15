@@ -65,7 +65,7 @@ lgb_params = {
                     'min_data_in_leaf': 2**12-1,
                     'feature_fraction': 0.5,
                     'max_bin': 100,
-                    'n_estimators': 100,
+                    'n_estimators': 10,
                     'boost_from_average': False,
                     'verbose': -1,
                 } 
